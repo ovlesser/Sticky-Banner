@@ -8,10 +8,11 @@
  * @format
  */
 
-import React from 'react';
+import React, {useRef} from 'react';
 import {
+  Animated,
+  Dimensions,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -62,10 +63,24 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const screenHeight: number = Dimensions.get('window').height;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const topSpace = 300;
+  const translateY = scrollY.interpolate({
+    inputRange: [0, topSpace, topSpace + 1, topSpace + 1 + screenHeight],
+    outputRange: [0, 0, 0, screenHeight],
+  });
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {
+            useNativeDriver: true,
+          },
+        )}
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
         <Header />
@@ -73,10 +88,14 @@ const App = () => {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
+          <Section
+            title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
             screen and then come back to see your edits.
           </Section>
+          <Animated.View style={{...styles.banner, transform: [{translateY}]}}>
+            <Section title="Sticky Banner" />
+          </Animated.View>
           <Section title="See Your Changes">
             <ReloadInstructions />
           </Section>
@@ -88,7 +107,7 @@ const App = () => {
           </Section>
           <LearnMoreLinks />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 };
@@ -109,6 +128,12 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  banner: {
+    backgroundColor: 'tomato',
+    marginTop: 10,
+    marginBottom: 12,
+    zIndex: 1,
   },
 });
 
