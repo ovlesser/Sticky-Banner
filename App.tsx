@@ -12,6 +12,7 @@ import React, {useRef} from 'react';
 import {
   Animated,
   Dimensions,
+  LayoutChangeEvent,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -30,10 +31,11 @@ import {
 
 const Section: React.FC<{
   title: string;
-}> = ({children, title}) => {
+  onLayout?: ((event: LayoutChangeEvent) => void) | undefined;
+}> = ({children, title, onLayout}) => {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
+    <View style={styles.sectionContainer} onLayout={onLayout}>
       <Text
         style={[
           styles.sectionTitle,
@@ -65,7 +67,9 @@ const App = () => {
 
   const screenHeight: number = Dimensions.get('window').height;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const topSpace = 300;
+  const yView = useRef(0);
+  const yBanner = useRef(0);
+  const topSpace = yView.current + yBanner.current;
   const translateY = scrollY.interpolate({
     inputRange: [0, topSpace, topSpace + 1, topSpace + 1 + screenHeight],
     outputRange: [0, 0, 0, screenHeight],
@@ -87,13 +91,19 @@ const App = () => {
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          }}
+          onLayout={(event: any) => {
+            yView.current = event.nativeEvent.layout.y;
           }}>
-          <Section
-            title="Step One">
+          <Section title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
             screen and then come back to see your edits.
           </Section>
-          <Animated.View style={{...styles.banner, transform: [{translateY}]}}>
+          <Animated.View
+            style={{...styles.banner, transform: [{translateY}]}}
+            onLayout={(event: any) => {
+              yBanner.current = event.nativeEvent.layout.y;
+            }}>
             <Section title="Sticky Banner" />
           </Animated.View>
           <Section title="See Your Changes">
