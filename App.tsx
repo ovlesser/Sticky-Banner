@@ -8,11 +8,12 @@
  * @format
  */
 
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
   LayoutChangeEvent,
+  NativeScrollEvent, NativeSyntheticEvent,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -74,6 +75,7 @@ const App = () => {
     inputRange: [0, topSpace, topSpace + 1, topSpace + 1 + screenHeight],
     outputRange: [0, 0, 0, screenHeight],
   });
+  const [sticky, setSticky] = useState(false);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -83,6 +85,9 @@ const App = () => {
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
           {
             useNativeDriver: true,
+            listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+              setSticky(event.nativeEvent.contentOffset.y >= topSpace);
+            },
           },
         )}
         contentInsetAdjustmentBehavior="automatic"
@@ -100,7 +105,11 @@ const App = () => {
             screen and then come back to see your edits.
           </Section>
           <Animated.View
-            style={{...styles.banner, transform: [{translateY}]}}
+            style={{
+              ...styles.banner,
+              transform: [{translateY}],
+              marginHorizontal: sticky ? 0 : 16,
+            }}
             onLayout={(event: any) => {
               yBanner.current = event.nativeEvent.layout.y;
             }}>
