@@ -13,7 +13,7 @@ import {
   Animated,
   Dimensions,
   LayoutChangeEvent,
-  NativeScrollEvent, NativeSyntheticEvent,
+  NativeScrollEvent, NativeSyntheticEvent, RefreshControl,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -91,6 +91,9 @@ const App = () => {
           },
         )}
         contentInsetAdjustmentBehavior="automatic"
+        refreshControl={
+          <RefreshControl refreshing={true} onRefresh={async () => {}} />
+        }
         style={backgroundStyle}>
         <Header />
         <View
